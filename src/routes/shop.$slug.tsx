@@ -50,7 +50,7 @@ function ProductPage() {
           {/* Gallery */}
           <div className="lg:col-span-7 grid grid-cols-12 gap-3">
             <div className="col-span-2 hidden lg:flex flex-col gap-3">
-              {product.images.map((img, i) => (
+              {product.images.map((img: string, i: number) => (
                 <button key={i} onClick={() => setActive(i)}
                   className={`aspect-square overflow-hidden bg-secondary ${active === i ? "ring-1 ring-foreground" : "opacity-60 hover:opacity-100"}`}>
                   <img src={img} alt="" className="h-full w-full object-cover" />
@@ -68,7 +68,7 @@ function ProductPage() {
                   className={`absolute inset-0 h-full w-full object-cover transition-transform duration-700 ${zoom ? "scale-150" : "scale-100"}`} />
               </motion.div>
               <div className="grid grid-cols-3 gap-3 mt-3 lg:hidden">
-                {product.images.map((img, i) => (
+                {product.images.map((img: string, i: number) => (
                   <button key={i} onClick={() => setActive(i)} className={`aspect-square bg-secondary overflow-hidden ${active === i ? "ring-1 ring-foreground" : "opacity-60"}`}>
                     <img src={img} alt="" className="h-full w-full object-cover" />
                   </button>
@@ -122,7 +122,7 @@ function ProductPage() {
             <div className="mt-10 border-t hairline pt-6">
               <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground mb-3">Particulars</p>
               <ul className="space-y-2 text-sm">
-                {product.details.map((d) => <li key={d} className="flex gap-3"><span className="text-muted-foreground">—</span>{d}</li>)}
+                {product.details.map((d: string) => <li key={d} className="flex gap-3"><span className="text-muted-foreground">—</span>{d}</li>)}
               </ul>
             </div>
 
