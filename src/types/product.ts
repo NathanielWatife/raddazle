@@ -8,7 +8,7 @@ export interface Product {
   compareAt?: number;
   rating: number;
   reviewCount: number;
-  badge?: "New" | "Edition" | "Last few" | "Restock";
+  badge?: "New" | "Edition" | "Last few" | "Restock" | "Sale";
   description: string;
   details: string[];
   images: string[];
