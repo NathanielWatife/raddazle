@@ -2,7 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { z } from "zod";
-import { products, categories } from "@/data/products";
+import { useQuery } from '@tanstack/react-query';
+import { fetchProducts } from '@/lib/api';
+import { categories as defaultCategories } from "@/data/products";
+import type { Product } from "@/types/product";
 import { ProductCard } from "@/components/site/ProductCard";
 
 const search = z.object({
@@ -32,15 +35,22 @@ function Shop() {
   const { category, sort } = Route.useSearch() ?? {};
   const [maxPrice, setMaxPrice] = useState(200);
 
+  const { data: dbProducts = [], isLoading } = useQuery<Product[]>({
+    queryKey: ['products'],
+    queryFn: fetchProducts,
+  });
+
+  const categories = defaultCategories; // Can also be fetched from API
+
   const filtered = useMemo(() => {
-    let list = [...products];
-    if (category) list = list.filter((p) => p.category === category);
+    let list = [...dbProducts];
+    if (category) list = list.filter((p) => p.category === category || p.category?.name === category);
     list = list.filter((p) => p.price <= maxPrice);
     if (sort === "low") list.sort((a, b) => a.price - b.price);
     else if (sort === "high") list.sort((a, b) => b.price - a.price);
     else if (sort === "rating") list.sort((a, b) => b.rating - a.rating);
     return list;
-  }, [category, sort, maxPrice]);
+  }, [dbProducts, category, sort, maxPrice]);
 
   return (
     <div className="mx-auto max-w-[1400px] px-5 lg:px-10">
@@ -66,7 +76,7 @@ function Shop() {
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link to="/shop" search={{}} className={`flex justify-between hover:opacity-60 ${!category ? "font-medium" : ""}`}>
-                    <span>All</span><span className="text-muted-foreground tabular-nums">{products.length}</span>
+                    <span>All</span><span className="text-muted-foreground tabular-nums">{dbProducts.length}</span>
                   </Link>
                 </li>
                 {categories.map((c) => (
@@ -118,14 +128,16 @@ function Shop() {
             </div>
           </div>
 
-          {filtered.length === 0 ? (
+          {isLoading ? (
+            <div className="py-32 text-center text-muted-foreground animate-pulse">Loading collection...</div>
+          ) : filtered.length === 0 ? (
             <div className="py-32 text-center">
               <p className="font-serif text-3xl italic">Nothing in this corner.</p>
               <p className="mt-3 text-muted-foreground text-sm">Try widening the price or another category.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-12">
-              {filtered.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+              {filtered.map((p, i) => <ProductCard key={p.id || i} product={p} index={i} />)}
             </div>
           )}
 

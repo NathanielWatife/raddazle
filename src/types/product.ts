@@ -13,6 +13,7 @@ export interface Product {
   details: string[];
   images: string[];
   inStock: boolean;
+  stock?: number;
 }
 
 export interface CartItem { product: Product; quantity: number; }
