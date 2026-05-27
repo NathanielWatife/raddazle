@@ -12,6 +12,7 @@ const navLinks = [
   { to: "/about", label: "Atelier" },
   { to: "/contact", label: "Contact" },
   { to: "/faq", label: "FAQ" },
+  { to: "/admin", label: "Admin" },
 ] as const;
 
 export function Navbar() {
@@ -166,6 +167,7 @@ export function Navbar() {
                 <Link to="/about" className="py-2">Atelier</Link>
                 <Link to="/contact" className="py-2">Contact</Link>
                 <Link to="/faq" className="py-2">FAQ</Link>
+                <Link to="/admin" className="py-2 text-muted-foreground text-2xl">Admin</Link>
                 <Link to="/auth/login" className="py-2">Account</Link>
               </nav>
               <div className="mt-auto pt-6 border-t hairline flex items-center justify-between text-xs uppercase tracking-[0.2em]">
