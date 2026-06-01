@@ -35,11 +35,11 @@ export function Navbar() {
   return (
     <>
       {/* Announcement bar */}
-      <div className="bg-foreground text-background text-[11px] uppercase tracking-[0.3em] py-2 text-center overflow-hidden">
+      <div className="bg-secondary text-secondary-foreground text-[11px] uppercase tracking-[0.3em] py-2.5 text-center overflow-hidden">
         <div className="flex whitespace-nowrap marquee gap-16">
           {Array.from({ length: 2 }).map((_, i) => (
             <div key={i} className="flex gap-16 shrink-0">
-              <span>Complimentary shipping over €150</span>
+              <span>✨ Complimentary shipping over €150</span>
               <span>·</span>
               <span>Hand-wrapped in Lisbon</span>
               <span>·</span>
@@ -54,19 +54,19 @@ export function Navbar() {
 
       <header
         className={`sticky top-0 z-40 transition-all duration-500 ${
-          scrolled ? "bg-background/85 backdrop-blur-md border-b hairline" : "bg-background border-b border-transparent"
+          scrolled ? "glass border-b hairline shadow-sm" : "bg-background border-b border-transparent"
         }`}
       >
         <div className="mx-auto max-w-[1400px] px-5 lg:px-10">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Left: mobile menu + nav */}
             <div className="flex items-center gap-8 flex-1">
-              <button onClick={() => setMobileOpen(true)} className="lg:hidden -ml-2 p-2" aria-label="Open menu">
+              <button onClick={() => setMobileOpen(true)} className="lg:hidden -ml-2 p-2 hover:bg-muted rounded-lg transition-colors" aria-label="Open menu">
                 <Menu className="h-5 w-5" strokeWidth={1.25} />
               </button>
-              <nav className="hidden lg:flex items-center gap-8 text-[12px] uppercase tracking-[0.18em]">
+              <nav className="hidden lg:flex items-center gap-1 text-[12px] uppercase tracking-[0.18em]">
                 <div onMouseEnter={() => setMegaOpen(true)} onMouseLeave={() => setMegaOpen(false)} className="relative">
-                  <Link to="/shop" className="hover:opacity-60 transition-opacity">Shop</Link>
+                  <Link to="/shop" className="px-4 py-2 hover:bg-muted rounded-lg transition-colors">Shop</Link>
                   <AnimatePresence>
                     {megaOpen && (
                       <motion.div
@@ -74,7 +74,7 @@ export function Navbar() {
                         transition={{ duration: 0.2 }}
                         className="absolute left-1/2 -translate-x-1/2 top-full pt-4"
                       >
-                        <div className="bg-background border hairline w-[640px] p-8 grid grid-cols-2 gap-x-10 gap-y-4 shadow-2xl shadow-black/5">
+                        <div className="glass border hairline w-[640px] p-8 grid grid-cols-2 gap-x-10 gap-y-4 shadow-xl rounded-2xl">
                           <div>
                             <p className="font-serif italic text-xs text-muted-foreground mb-3 normal-case tracking-normal">Browse</p>
                             <ul className="space-y-2">
@@ -99,7 +99,7 @@ export function Navbar() {
                   </AnimatePresence>
                 </div>
                 {navLinks.slice(1).map((l) => (
-                  <Link key={l.to} to={l.to} className="hover:opacity-60 transition-opacity" activeProps={{ className: "opacity-100 [&]:font-medium" }}>
+                  <Link key={l.to} to={l.to} className="px-4 py-2 hover:bg-muted rounded-lg transition-colors" activeProps={{ className: "bg-muted" }}>
                     {l.label}
                   </Link>
                 ))}
@@ -113,28 +113,28 @@ export function Navbar() {
 
             {/* Right */}
             <div className="flex items-center gap-1 lg:gap-2 flex-1 justify-end">
-              <button onClick={() => setSearchOpen(true)} className="p-2 hover:opacity-60" aria-label="Search">
+              <button onClick={() => setSearchOpen(true)} className="p-2 hover:bg-muted rounded-lg transition-colors" aria-label="Search">
                 <Search className="h-[18px] w-[18px]" strokeWidth={1.25} />
               </button>
-              <button onClick={toggle} className="p-2 hover:opacity-60 hidden sm:block" aria-label="Toggle theme">
+              <button onClick={toggle} className="p-2 hover:bg-muted rounded-lg transition-colors hidden sm:block" aria-label="Toggle theme">
                 {theme === "light" ? <Moon className="h-[18px] w-[18px]" strokeWidth={1.25} /> : <Sun className="h-[18px] w-[18px]" strokeWidth={1.25} />}
               </button>
-              <Link to="/auth/login" className="p-2 hover:opacity-60 hidden sm:block" aria-label="Account">
+              <Link to="/auth/login" className="p-2 hover:bg-muted rounded-lg transition-colors hidden sm:block" aria-label="Account">
                 <User className="h-[18px] w-[18px]" strokeWidth={1.25} />
               </Link>
-              <Link to="/wishlist" className="p-2 hover:opacity-60 relative" aria-label="Wishlist">
+              <Link to="/wishlist" className="p-2 hover:bg-muted rounded-lg transition-colors relative" aria-label="Wishlist">
                 <Heart className="h-[18px] w-[18px]" strokeWidth={1.25} />
                 {wishlist.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 text-[10px] tabular-nums bg-foreground text-background rounded-full h-4 w-4 flex items-center justify-center">{wishlist.length}</span>
+                  <span className="absolute -top-0.5 -right-0.5 text-[10px] tabular-nums bg-secondary text-secondary-foreground rounded-full h-4 w-4 flex items-center justify-center font-semibold">{wishlist.length}</span>
                 )}
               </Link>
-              <Link to="/cart" className="p-2 hover:opacity-60 relative" aria-label="Cart">
+              <Link to="/cart" className="p-2 hover:bg-muted rounded-lg transition-colors relative" aria-label="Cart">
                 <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.25} />
                 {cartCount > 0 && (
                   <motion.span
                     key={cartCount}
                     initial={{ scale: 0.5 }} animate={{ scale: 1 }}
-                    className="absolute -top-0.5 -right-0.5 text-[10px] tabular-nums bg-foreground text-background rounded-full h-4 w-4 flex items-center justify-center"
+                    className="absolute -top-0.5 -right-0.5 text-[10px] tabular-nums bg-secondary text-secondary-foreground rounded-full h-4 w-4 flex items-center justify-center font-semibold"
                   >{cartCount}</motion.span>
                 )}
               </Link>
@@ -151,11 +151,11 @@ export function Navbar() {
             <motion.aside
               initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
               transition={{ type: "tween", duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-y-0 left-0 z-50 w-[85%] max-w-sm bg-background p-6 flex flex-col"
+              className="fixed inset-y-0 left-0 z-50 w-[85%] max-w-sm bg-background p-6 flex flex-col rounded-r-2xl shadow-lg"
             >
               <div className="flex justify-between items-center mb-12">
                 <span className="font-serif text-xl tracking-[0.2em] uppercase">Souvenir</span>
-                <button onClick={() => setMobileOpen(false)} aria-label="Close"><X className="h-5 w-5" strokeWidth={1.25} /></button>
+                <button onClick={() => setMobileOpen(false)} aria-label="Close" className="p-2 hover:bg-muted rounded-lg transition-colors"><X className="h-5 w-5" strokeWidth={1.25} /></button>
               </div>
               <nav className="flex flex-col gap-1 font-serif text-3xl">
                 <Link to="/shop" className="py-2">Shop</Link>

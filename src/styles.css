@@ -36,53 +36,57 @@
 }
 
 :root {
-  --radius: 0.25rem;
-  /* Paper & Ink editorial palette */
-  --paper: oklch(0.971 0.008 80);          /* #f5f3ee */
-  --cream: oklch(0.935 0.010 75);          /* #e8e4dd */
-  --ink: oklch(0.18 0 0);                   /* near-black */
+  --radius: 0.75rem;
+  /* Modern luxury palette */
+  --paper: oklch(0.975 0.006 80);          /* Light warm white #faf8f5 */
+  --cream: oklch(0.94 0.012 72);           /* Warm cream #f0ebe3 */
+  --ink: oklch(0.15 0 0);                  /* Deep black #262626 */
+  --sage: oklch(0.62 0.06 155);            /* Sage green accent */
+  --warmth: oklch(0.64 0.15 50);           /* Warm ochre accent */
 
   --background: var(--paper);
   --foreground: var(--ink);
-  --card: oklch(0.985 0.005 80);
+  --card: oklch(0.99 0.003 80);
   --card-foreground: var(--ink);
-  --popover: oklch(0.985 0.005 80);
+  --popover: oklch(0.99 0.003 80);
   --popover-foreground: var(--ink);
   --primary: var(--ink);
   --primary-foreground: var(--paper);
-  --secondary: var(--cream);
-  --secondary-foreground: var(--ink);
-  --muted: var(--cream);
-  --muted-foreground: oklch(0.45 0.01 75);
-  --accent: var(--cream);
-  --accent-foreground: var(--ink);
+  --secondary: var(--sage);
+  --secondary-foreground: white;
+  --muted: oklch(0.75 0.008 80);
+  --muted-foreground: oklch(0.50 0.01 75);
+  --accent: var(--warmth);
+  --accent-foreground: white;
   --destructive: oklch(0.55 0.22 27);
   --destructive-foreground: oklch(0.985 0.005 80);
-  --border: oklch(0.86 0.012 80);
-  --input: oklch(0.86 0.012 80);
+  --border: oklch(0.88 0.008 80);
+  --input: oklch(0.88 0.008 80);
   --ring: var(--ink);
 }
 
 .dark {
-  --paper: oklch(0.14 0 0);
+  --paper: oklch(0.12 0 0);
   --cream: oklch(0.22 0.005 75);
-  --ink: oklch(0.96 0.005 80);
+  --ink: oklch(0.97 0.003 80);
+  --sage: oklch(0.55 0.06 155);
+  --warmth: oklch(0.60 0.12 50);
   --background: var(--paper);
   --foreground: var(--ink);
-  --card: oklch(0.18 0.005 75);
+  --card: oklch(0.16 0.003 75);
   --card-foreground: var(--ink);
-  --popover: oklch(0.18 0.005 75);
+  --popover: oklch(0.16 0.003 75);
   --popover-foreground: var(--ink);
   --primary: var(--ink);
   --primary-foreground: var(--paper);
-  --secondary: var(--cream);
-  --secondary-foreground: var(--ink);
-  --muted: var(--cream);
+  --secondary: var(--sage);
+  --secondary-foreground: white;
+  --muted: oklch(0.35 0.006 80);
   --muted-foreground: oklch(0.65 0.01 75);
-  --accent: var(--cream);
-  --accent-foreground: var(--ink);
-  --border: oklch(0.28 0.005 75);
-  --input: oklch(0.28 0.005 75);
+  --accent: var(--warmth);
+  --accent-foreground: white;
+  --border: oklch(0.25 0.005 75);
+  --input: oklch(0.25 0.005 75);
   --ring: var(--ink);
 }
 
@@ -120,11 +124,18 @@
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
+  .slide-in {
+    animation: slideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
   .grain {
     background-image: radial-gradient(rgba(0,0,0,0.04) 1px, transparent 1px);
     background-size: 3px 3px;
   }
-  .hairline { border-color: color-mix(in oklab, var(--ink) 15%, transparent); }
+  .hairline { border-color: color-mix(in oklab, var(--ink) 10%, transparent); }
   .link-underline {
     background-image: linear-gradient(currentColor, currentColor);
     background-position: 0 100%;
@@ -133,4 +144,24 @@
     transition: background-size 0.4s ease;
   }
   .link-underline:hover { background-size: 0% 1px; }
+  
+  .btn-modern {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center gap-2;
+  }
+  .btn-modern-primary {
+    @apply btn-modern bg-foreground text-background hover:bg-foreground/90 shadow-sm hover:shadow-md;
+  }
+  .btn-modern-secondary {
+    @apply btn-modern border border-foreground/20 text-foreground hover:border-foreground/40 hover:bg-background;
+  }
+  .btn-modern-accent {
+    @apply btn-modern bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-sm hover:shadow-md;
+  }
+  
+  .glass {
+    background-color: color-mix(in srgb, var(--background) 95%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--foreground) 5%, transparent);
+  }
 }

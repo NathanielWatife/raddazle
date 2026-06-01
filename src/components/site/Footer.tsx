@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 export function Footer() {
   return (
-    <footer className="border-t hairline bg-background mt-24">
+    <footer className="border-t hairline bg-gradient-to-b from-background to-muted/10 mt-24">
       <div className="mx-auto max-w-[1400px] px-5 lg:px-10 py-16 lg:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-5">
@@ -16,11 +16,11 @@ export function Footer() {
             </p>
             <form
               onSubmit={(e) => { e.preventDefault(); toast.success("Welcome aboard. First letter posts Sunday."); (e.target as HTMLFormElement).reset(); }}
-              className="mt-8 flex border-b hairline pb-3 max-w-md"
+              className="mt-8 flex items-center border border-border rounded-xl p-3 max-w-md focus-within:border-foreground/40 transition-colors"
             >
-              <Mail className="h-4 w-4 mt-1 mr-3 text-muted-foreground" strokeWidth={1.25} />
+              <Mail className="h-4 w-4 mr-3 text-muted-foreground" strokeWidth={1.25} />
               <input type="email" required placeholder="your@address.com" className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
-              <button type="submit" className="text-[11px] uppercase tracking-[0.25em] hover:opacity-60">Subscribe →</button>
+              <button type="submit" className="text-[11px] uppercase tracking-[0.25em] text-secondary font-semibold hover:text-secondary/80 ml-2">Subscribe</button>
             </form>
           </div>
 
@@ -59,11 +59,11 @@ export function Footer() {
 
         <div className="mt-16 pt-8 border-t hairline flex flex-col-reverse md:flex-row items-start md:items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} SOUVENIR · Objects worth keeping.</p>
-          <div className="flex items-center gap-6 text-xs text-muted-foreground">
-            <a href="#" className="link-underline">Privacy</a>
-            <a href="#" className="link-underline">Terms</a>
-            <a href="#" className="link-underline">Shipping</a>
-            <a href="#" aria-label="Instagram" className="hover:opacity-60"><Instagram className="h-4 w-4" strokeWidth={1.25} /></a>
+          <div className="flex items-center gap-8 text-xs text-muted-foreground">
+            <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
+            <a href="#" className="hover:text-foreground transition-colors">Terms</a>
+            <a href="#" className="hover:text-foreground transition-colors">Shipping</a>
+            <a href="#" aria-label="Instagram" className="hover:text-secondary transition-colors"><Instagram className="h-4 w-4" strokeWidth={1.25} /></a>
           </div>
         </div>
       </div>
