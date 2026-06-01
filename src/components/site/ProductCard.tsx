@@ -18,32 +18,32 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
       className="group"
     >
       <Link to="/shop/$slug" params={{ slug: product.slug }} className="block">
-        <div className="relative overflow-hidden bg-secondary aspect-[4/5]">
+        <div className="relative overflow-hidden bg-secondary aspect-[4/5] rounded-2xl">
           <img src={product.images[0]} alt={product.name} loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.04]" />
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]" />
           {product.images[1] && (
             <img src={product.images[1]} alt="" aria-hidden
               className="absolute inset-0 h-full w-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           )}
 
           {product.badge && (
-            <span className="absolute top-3 left-3 text-[10px] uppercase tracking-[0.2em] bg-background/90 backdrop-blur px-2.5 py-1">
+            <span className="absolute top-4 left-4 text-[10px] uppercase tracking-[0.2em] bg-accent text-accent-foreground px-3 py-1.5 rounded-lg font-semibold">
               {product.badge}
             </span>
           )}
 
           <button
             onClick={(e) => { e.preventDefault(); toggleWishlist(product); toast(wished ? "Removed from wishlist" : "Saved to wishlist"); }}
-            className="absolute top-3 right-3 h-9 w-9 grid place-items-center bg-background/90 backdrop-blur hover:bg-background transition-colors"
+            className="absolute top-4 right-4 h-10 w-10 grid place-items-center bg-background/95 backdrop-blur hover:bg-background transition-all rounded-full shadow-md hover:shadow-lg"
             aria-label="Save"
           >
-            <Heart className={`h-4 w-4 transition-all ${wished ? "fill-foreground" : ""}`} strokeWidth={1.25} />
+            <Heart className={`h-4 w-4 transition-all ${wished ? "fill-secondary text-secondary" : ""}`} strokeWidth={1.25} />
           </button>
 
           <div className="absolute inset-x-3 bottom-3 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
             <button
               onClick={(e) => { e.preventDefault(); addToCart(product); toast.success(`${product.name} added`); }}
-              className="w-full bg-foreground text-background text-[11px] uppercase tracking-[0.25em] py-3 hover:bg-foreground/90"
+              className="w-full bg-foreground text-background text-[11px] uppercase tracking-[0.25em] py-3 hover:bg-foreground/90 rounded-lg font-semibold shadow-lg hover:shadow-xl"
             >
               Quick add
             </button>
