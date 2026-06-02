@@ -48,6 +48,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 
 // Styles
+import './styles/index.css';
 import './styles/bootstrap.min.css';
 import './styles/style.css';
 
