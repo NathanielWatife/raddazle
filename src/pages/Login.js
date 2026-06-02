@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
-import AnimatedSection from '../components/AnimatedSection';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { useToast } from '../context/ToastContext';
+import { motion } from 'framer-motion';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -13,6 +13,7 @@ const Login = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [resendLoading, setResendLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login, refreshUser, isAdmin, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -91,7 +92,6 @@ const Login = () => {
     verifyNow();
   };
 
-  // Auto-submit when unverified prompt is visible and code has 6 digits
   useEffect(() => {
     if (isUnverified && verificationCode.trim().length === 6 && !verifyLoading) {
       verifyNow();
@@ -99,7 +99,6 @@ const Login = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verificationCode, isUnverified]);
 
-  // If already authenticated, route admins to dashboard, customers to intended path/home
   useEffect(() => {
     if (isAuthenticated) {
       if (isAdmin) {
@@ -113,104 +112,227 @@ const Login = () => {
 
   return (
     <Layout>
-      <AnimatedSection className="container-fluid page-header py-5" animationClass="animate-fade-up">
-        <h1 className="text-center text-white display-6">Sign In</h1>
-        <ol className="breadcrumb justify-content-center mb-0">
-          <li className="breadcrumb-item"><a href="/">Home</a></li>
-          <li className="breadcrumb-item active text-white">Login</li>
-        </ol>
-      </AnimatedSection>
-      <AnimatedSection className="container py-5" animationClass="animate-fade-up">
-        <div className="row justify-content-center">
-          <div className="col-lg-6">
-            <div className="card shadow-sm border-0">
-              <div className="card-body p-4 p-md-5">
-                <h2 className="text-center text-primary mb-1">Welcome back</h2>
-                <p className="text-center text-muted mb-4">Sign in to access your account</p>
+      {/* Page Header */}
+      <motion.div 
+        className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border-b border-border py-8 sm:py-12"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-3"
+          >
+            <h1 className="text-4xl sm:text-5xl font-bold text-foreground">Sign In</h1>
+            <p className="text-muted-foreground flex items-center gap-2">
+              <i className="fas fa-home text-primary"></i>
+              Home / <span className="text-primary">Login</span>
+            </p>
+          </motion.div>
+        </div>
+      </motion.div>
 
+      {/* Login Form */}
+      <motion.div 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left Side - Welcome Message */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="space-y-6"
+          >
+            <div>
+              <span className="inline-block text-sm font-semibold text-primary uppercase tracking-wide mb-2">
+                Welcome Back
+              </span>
+              <h2 className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">
+                Sign in to your account
+              </h2>
+            </div>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Access your exclusive collection, view order history, and enjoy personalized shopping experiences.
+            </p>
+            <div className="space-y-4">
+              {[
+                { icon: 'fas fa-shield-alt', text: 'Secure & encrypted' },
+                { icon: 'fas fa-bolt', text: 'Quick sign in process' },
+                { icon: 'fas fa-user-check', text: 'Personalized experience' },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <i className={`${item.icon} text-primary`}></i>
+                  </div>
+                  <span className="text-foreground font-medium">{item.text}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
 
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-3">
-                    <label htmlFor="email" className="form-label">Email address</label>
+          {/* Right Side - Form */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className="bg-card border border-border rounded-2xl p-8 space-y-6">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-foreground">Login</h3>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Email Field */}
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <i className="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
                     <input
                       type="email"
-                      className="form-control"
+                      className="w-full bg-muted border border-border rounded-lg pl-12 pr-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                       id="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
+                      placeholder="you@example.com"
                       autoComplete="email"
                       required
                     />
                   </div>
+                </div>
 
-                  <div className="mb-3">
-                    <label htmlFor="password" className="form-label">Password</label>
+                {/* Password Field */}
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <i className="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
                     <input
-                      type="password"
-                      className="form-control"
+                      type={showPassword ? 'text' : 'password'}
+                      className="w-full bg-muted border border-border rounded-lg pl-12 pr-12 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                       id="password"
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
+                      placeholder="Enter your password"
                       autoComplete="current-password"
                       required
                     />
-                  </div>
-                  <div className="d-flex justify-content-end mb-4">
-                    <Link to="/forgot-password" className="text-decoration-none">Forgot password?</Link>
-                  </div>
-
-                  <button type="submit" className="btn btn-primary w-100 btn-glow" disabled={loading}>
-                    {loading ? 'Signing in...' : 'Sign In'}
-                  </button>
-                </form>
-
-                {isUnverified && (
-                  <div className="mt-4 p-3 border rounded-3">
-                    <h6 className="mb-2">Verify your email</h6>
-                    <p className="text-muted mb-3">Enter the 6-digit code sent to <strong>{formData.email}</strong> or resend the code.</p>
-                    <form onSubmit={handleVerify} className="mb-2">
-                      <div className="mb-3">
-                        <label htmlFor="code" className="form-label">Verification code</label>
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          pattern="\\d{6}"
-                          maxLength={6}
-                          className="form-control text-center"
-                          id="code"
-                          name="code"
-                          value={verificationCode}
-                          onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ''))}
-                          placeholder="Enter 6-digit code"
-                          required
-                        />
-                      </div>
-                      <button type="submit" className="btn btn-primary w-100 btn-glow" disabled={verifyLoading}>
-                        {verifyLoading ? 'Verifying...' : 'Verify & Continue'}
-                      </button>
-                    </form>
                     <button
                       type="button"
-                      className="btn btn-link p-0"
-                      onClick={handleResend}
-                      disabled={resendLoading}
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-200"
                     >
-                      {resendLoading ? 'Resending...' : 'Resend code'}
+                      <i className={`fas fa-eye${showPassword ? '-slash' : ''}`}></i>
                     </button>
                   </div>
-                )}
-
-                <div className="text-center mt-4">
-                  <span className="text-muted">Don't have an account? </span>
-                  <Link to="/register" className="text-primary text-decoration-none">Create one</Link>
                 </div>
+
+                {/* Forgot Password Link */}
+                <div className="text-right">
+                  <Link to="/forgot-password" className="text-sm text-primary hover:text-accent transition-colors duration-300">
+                    Forgot your password?
+                  </Link>
+                </div>
+
+                {/* Sign In Button */}
+                <motion.button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {loading ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-sign-in-alt"></i>
+                      Sign In
+                    </>
+                  )}
+                </motion.button>
+              </form>
+
+              {/* Email Verification Section */}
+              {isUnverified && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-6 p-4 bg-accent/10 border border-accent/20 rounded-lg space-y-4"
+                >
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-1 flex items-center gap-2">
+                      <i className="fas fa-info-circle text-accent"></i>
+                      Verify Your Email
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      Enter the 6-digit code sent to <strong>{formData.email}</strong>
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleVerify} className="space-y-3">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="\\d{6}"
+                      maxLength={6}
+                      className="w-full text-center text-2xl tracking-widest bg-muted border border-border rounded-lg px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 font-mono"
+                      name="code"
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ''))}
+                      placeholder="000000"
+                      required
+                    />
+                    <motion.button 
+                      type="submit" 
+                      disabled={verifyLoading}
+                      className="w-full px-4 py-2.5 bg-accent text-white rounded-lg font-medium hover:bg-accent/90 disabled:opacity-50 transition-all duration-300"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      {verifyLoading ? 'Verifying...' : 'Verify & Continue'}
+                    </motion.button>
+                  </form>
+
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendLoading}
+                    className="w-full text-sm text-primary hover:text-accent transition-colors duration-200 py-2"
+                  >
+                    {resendLoading ? 'Resending...' : 'Resend code'}
+                  </button>
+                </motion.div>
+              )}
+
+              {/* Sign Up Link */}
+              <div className="pt-4 border-t border-border text-center">
+                <p className="text-muted-foreground">
+                  Don&apos;t have an account?{' '}
+                  <Link to="/register" className="text-primary font-semibold hover:text-accent transition-colors duration-300">
+                    Create one
+                  </Link>
+                </p>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </AnimatedSection>
+      </motion.div>
     </Layout>
   );
 };

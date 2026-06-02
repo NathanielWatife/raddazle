@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
-import AnimatedSection from '../components/AnimatedSection';
 import { useCart } from '../context/CartContext';
 import { formatCurrency } from '../utils/currency';
 import { getImageUrl } from '../services/api';
 import { orderService, paymentService, userService } from '../services';
 import { useToast } from '../context/ToastContext';
+import { motion } from 'framer-motion';
 
 const Checkout = () => {
   const { cart, getCartTotal, clearCart } = useCart();
@@ -33,21 +33,15 @@ const Checkout = () => {
   const paystackPublicKey = process.env.REACT_APP_PAYSTACK_PUBLIC_KEY;
   const flwPublicKey = process.env.REACT_APP_FLW_PUBLIC_KEY;
 
-  // Load user profile and saved addresses
   const loadUserProfile = useCallback(async () => {
     try {
       setLoadingProfile(true);
       const profile = await userService.getProfile();
       const userData = profile.user || profile;
-      
-      // Get shipping addresses
       const shippingAddresses = userData.shippingAddress || [];
       setSavedAddresses(shippingAddresses);
-      
-      // Find default address or use the first one
       const defaultAddress = shippingAddresses.find(addr => addr.isDefault) || shippingAddresses[0];
       
-      // Pre-fill form with user data and default address
       setFormData(prev => ({
         ...prev,
         firstName: userData.firstName || userData.name?.split(' ')[0] || '',
@@ -80,7 +74,6 @@ const Checkout = () => {
   }, [loadUserProfile]);
 
   useEffect(() => {
-    // Fetch bank info for display if bank-transfer is chosen
     const loadBank = async () => {
       try {
         const res = await paymentService.getBankInfo();
@@ -239,117 +232,141 @@ const Checkout = () => {
     return null;
   }
 
+  const subtotal = getCartTotal();
+  const shipping = 3;
+  const total = subtotal + shipping;
+
   return (
     <Layout>
-      <AnimatedSection className="container-fluid page-header py-5" animationClass="animate-fade-up">
-        <h1 className="text-center text-white display-6">Checkout</h1>
-        <ol className="breadcrumb justify-content-center mb-0">
-          <li className="breadcrumb-item"><a href="/">Home</a></li>
-          <li className="breadcrumb-item"><a href="/cart">Cart</a></li>
-          <li className="breadcrumb-item active text-white">Checkout</li>
-        </ol>
-      </AnimatedSection>
-      {/* Checkout Page Start */}
-      <AnimatedSection className="container-fluid py-5" animationClass="animate-fade-up">
-        <div className="container py-5">
-          <h1 className="mb-4">Billing details</h1>
-          
-          {loadingProfile ? (
-            <div className="text-center py-4">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-              <p className="mt-2 text-muted">Loading your saved information...</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              <div className="row g-5">
-                <div className="col-md-12 col-lg-6 col-xl-7">
-                  {/* Saved Addresses Section */}
-                  {savedAddresses.length > 0 && (
-                    <div className="mb-4 p-3 border rounded bg-light">
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <h5 className="mb-0">
-                          <i className="fas fa-map-marker-alt me-2 text-primary"></i>
-                          Shipping Address
-                        </h5>
-                      </div>
-                      <div className="row g-2">
-                        {savedAddresses.map((addr) => (
-                          <div key={addr._id} className="col-12">
-                            <div 
-                              className={`p-3 border rounded ${selectedAddressId === addr._id && !useNewAddress ? 'border-primary bg-white shadow-sm' : 'bg-white'}`}
-                              style={{ cursor: 'pointer' }}
-                              onClick={() => handleAddressSelect(addr._id)}
-                            >
-                              <div className="d-flex align-items-start">
-                                <input 
-                                  type="radio" 
-                                  className="form-check-input mt-1 me-3" 
-                                  checked={selectedAddressId === addr._id && !useNewAddress}
-                                  onChange={() => handleAddressSelect(addr._id)}
-                                  name="savedAddress"
-                                />
-                                <div className="flex-grow-1">
-                                  <div className="d-flex justify-content-between align-items-start">
-                                    <div>
-                                      <p className="mb-1 fw-semibold">{addr.street}</p>
-                                      <p className="mb-0 text-muted small">
-                                        {addr.city}, {addr.state} {addr.postalCode}
-                                      </p>
-                                      <p className="mb-0 text-muted small">{addr.country}</p>
-                                    </div>
-                                    {addr.isDefault && (
-                                      <span className="badge bg-primary">Default</span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                        {/* Option to add new address */}
-                        <div className="col-12">
-                          <div 
-                            className={`p-3 border rounded ${useNewAddress ? 'border-primary bg-white shadow-sm' : 'bg-white'}`}
-                            style={{ cursor: 'pointer' }}
-                            onClick={handleUseNewAddress}
+      {/* Page Header */}
+      <motion.div 
+        className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border-b border-border py-8 sm:py-12"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-3"
+          >
+            <h1 className="text-4xl sm:text-5xl font-bold text-foreground">Checkout</h1>
+            <p className="text-muted-foreground flex items-center gap-2">
+              <i className="fas fa-home text-primary"></i>
+              Home / <span className="text-primary">Cart</span> / <span className="text-primary">Checkout</span>
+            </p>
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* Checkout Content */}
+      <motion.div 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {loadingProfile ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="w-12 h-12 rounded-full border-4 border-muted border-t-primary animate-spin mb-4"></div>
+            <p className="text-muted-foreground">Loading your saved information...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left - Billing & Shipping Info */}
+              <motion.div 
+                className="lg:col-span-2 space-y-8"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                {/* Shipping Address Section */}
+                {savedAddresses.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+                      <i className="fas fa-map-marker-alt text-primary"></i>
+                      Shipping Address
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {savedAddresses.map((addr) => (
+                        <div key={addr._id}>
+                          <button
+                            type="button"
+                            onClick={() => handleAddressSelect(addr._id)}
+                            className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                              selectedAddressId === addr._id && !useNewAddress
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/50'
+                            }`}
                           >
-                            <div className="d-flex align-items-center">
+                            <div className="flex gap-3">
                               <input 
                                 type="radio" 
-                                className="form-check-input me-3" 
-                                checked={useNewAddress}
-                                onChange={handleUseNewAddress}
-                                name="savedAddress"
+                                checked={selectedAddressId === addr._id && !useNewAddress}
+                                onChange={() => handleAddressSelect(addr._id)}
+                                className="mt-1"
                               />
                               <div>
-                                <p className="mb-0 fw-semibold">
-                                  <i className="fas fa-plus me-2 text-primary"></i>
-                                  Use a different address
+                                <p className="font-semibold text-foreground">{addr.street}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {addr.city}, {addr.state} {addr.postalCode}
                                 </p>
+                                <p className="text-sm text-muted-foreground">{addr.country}</p>
+                                {addr.isDefault && (
+                                  <span className="inline-block mt-2 px-2 py-1 text-xs bg-primary text-white rounded">Default</span>
+                                )}
                               </div>
                             </div>
-                          </div>
+                          </button>
                         </div>
+                      ))}
+                      
+                      {/* Add New Address Option */}
+                      <div>
+                        <button
+                          type="button"
+                          onClick={handleUseNewAddress}
+                          className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                            useNewAddress
+                              ? 'border-primary bg-primary/5'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <div className="flex gap-3">
+                            <input 
+                              type="radio" 
+                              checked={useNewAddress}
+                              onChange={handleUseNewAddress}
+                              className="mt-1"
+                            />
+                            <div>
+                              <p className="font-semibold text-foreground flex items-center gap-2">
+                                <i className="fas fa-plus"></i>
+                                Use a different address
+                              </p>
+                            </div>
+                          </div>
+                        </button>
                       </div>
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {/* Show address form if no saved addresses or using new address */}
-                  {(savedAddresses.length === 0 || useNewAddress) && (
-                    <div className={savedAddresses.length > 0 ? 'p-3 border rounded bg-light mb-4' : ''}>
-                      {savedAddresses.length > 0 && (
-                        <h6 className="mb-3 text-muted">
-                          <i className="fas fa-pencil-alt me-2"></i>
-                          Enter shipping address
-                        </h6>
-                      )}
-                      <div className="form-item">
-                        <label className="form-label my-3">Address <sup>*</sup></label>
+                {/* Address Form */}
+                {(savedAddresses.length === 0 || useNewAddress) && (
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-foreground">
+                      {savedAddresses.length > 0 ? 'Enter a Different Address' : 'Shipping Address'}
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">Street Address *</label>
                         <input
                           type="text"
-                          className="form-control"
+                          className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                           placeholder="House Number Street Name"
                           name="address"
                           value={formData.address}
@@ -357,87 +374,90 @@ const Checkout = () => {
                           required
                         />
                       </div>
-                      <div className="form-item">
-                        <label className="form-label my-3">Town/City<sup>*</sup></label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          name="city"
-                          value={formData.city}
-                          onChange={handleChange}
-                          required
-                        />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">City/Town *</label>
+                          <input
+                            type="text"
+                            className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
+                            name="city"
+                            value={formData.city}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">State/Province *</label>
+                          <input
+                            type="text"
+                            className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
+                            name="state"
+                            value={formData.state}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
                       </div>
-                      <div className="form-item">
-                        <label className="form-label my-3">Country<sup>*</sup></label>
+
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">Country *</label>
                         <input
                           type="text"
-                          className="form-control"
+                          className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                           name="country"
                           value={formData.country}
                           onChange={handleChange}
                           required
                         />
                       </div>
-                      <div className="form-item">
-                        <label className="form-label my-3">State/Province<sup>*</sup></label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          name="state"
-                          value={formData.state}
-                          onChange={handleChange}
-                          required
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Customer Information */}
-                  <div className="row">
-                    <div className="col-md-12 col-lg-6">
-                      <div className="form-item w-100">
-                        <label className="form-label my-3">First Name<sup>*</sup></label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          name="firstName"
-                          value={formData.firstName}
-                          onChange={handleChange}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="col-md-12 col-lg-6">
-                      <div className="form-item w-100">
-                        <label className="form-label my-3">Last Name<sup>*</sup></label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          name="lastName"
-                          value={formData.lastName}
-                          onChange={handleChange}
-                          required
-                        />
-                      </div>
                     </div>
                   </div>
-                  <div className="form-item">
-                    <label className="form-label my-3">Mobile<sup>*</sup></label>
+                )}
+
+                {/* Contact Information */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-foreground">Contact Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">First Name *</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">Last Name *</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Phone Number *</label>
                     <input
                       type="tel"
-                      className="form-control"
+                      className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                       name="mobile"
                       value={formData.mobile}
                       onChange={handleChange}
                       required
                     />
                   </div>
-                  <div className="form-item">
-                    <label className="form-label my-3">Email Address<sup>*</sup></label>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Email Address *</label>
                     <input
                       type="email"
-                      className="form-control"
+                      className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
@@ -445,150 +465,157 @@ const Checkout = () => {
                     />
                   </div>
                 </div>
-                <div className="col-md-12 col-lg-6 col-xl-5">
-                  <div className="table-responsive">
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th scope="col">Products</th>
-                          <th scope="col">Name</th>
-                          <th scope="col">Price</th>
-                          <th scope="col">Quantity</th>
-                          <th scope="col">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {cart.items.map((item) => (
-                          <tr key={item.product._id}>
-                            <th scope="row">
-                              <div className="d-flex align-items-center mt-2">
-                                <img
-                                  src={getImageUrl(item.product.image) || '/img/product-placeholder.jpg'}
-                                  className="img-fluid rounded-circle"
-                                  style={{ width: '90px', height: '90px', objectFit: 'cover' }}
-                                  alt={item.product.name}
-                                  onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = '/img/product-placeholder.jpg';
-                                  }}
-                                />
-                              </div>
-                            </th>
-                            <td className="py-5">{item.product.name}</td>
-                            <td className="py-5">{formatCurrency(item.product.price)}</td>
-                            <td className="py-5">{item.quantity}</td>
-                            <td className="py-5">{formatCurrency(item.product.price * item.quantity)}</td>
-                          </tr>
-                        ))}
-                        <tr>
-                          <th scope="row"></th>
-                          <td className="py-5"></td>
-                          <td className="py-5"></td>
-                          <td className="py-5">
-                            <p className="mb-0 text-dark py-3">Subtotal</p>
-                          </td>
-                          <td className="py-5">
-                            <div className="py-3 border-bottom border-top">
-                              <p className="mb-0 text-dark">{formatCurrency(getCartTotal())}</p>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th scope="row"></th>
-                          <td className="py-5">
-                            <p className="mb-0 text-dark py-4">Shipping</p>
-                          </td>
-                          <td colSpan="3" className="py-5">
-                            <div className="form-check text-start">
-                              <input
-                                type="checkbox"
-                                className="form-check-input bg-primary border-0"
-                                id="Shipping-1"
-                                name="Shipping-1"
-                                defaultChecked
-                              />
-                              <label className="form-check-label" htmlFor="Shipping-1">
-                                Free Shipping
-                              </label>
-                            </div>
-                            <div className="form-check text-start">
-                              <input
-                                type="checkbox"
-                                className="form-check-input bg-primary border-0"
-                                id="Shipping-2"
-                                name="Shipping-2"
-                              />
-                              <label className="form-check-label" htmlFor="Shipping-2">
-                                Flat rate: {formatCurrency(15)}
-                              </label>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th scope="row"></th>
-                          <td className="py-5">
-                            <p className="mb-0 text-dark text-uppercase py-3">TOTAL</p>
-                          </td>
-                          <td className="py-5"></td>
-                          <td className="py-5"></td>
-                          <td className="py-5">
-                            <div className="py-3 border-bottom border-top">
-                              <p className="mb-0 text-dark">{formatCurrency(getCartTotal())}</p>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+
+                {/* Payment Method */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-foreground">Payment Method</h3>
+                  <div className="space-y-3">
+                    {[
+                      { value: 'cod', label: 'Cash on Delivery', icon: 'fas fa-money-bill' },
+                      { value: 'paystack', label: 'Paystack (Card, Bank, USSD)', icon: 'fas fa-credit-card' },
+                      { value: 'bank-transfer', label: 'Bank Transfer', icon: 'fas fa-university' },
+                    ].map((method) => (
+                      <label key={method.value} className="flex items-center p-4 rounded-lg border-2 border-border cursor-pointer hover:border-primary/50 transition-all duration-200"
+                        style={{
+                          borderColor: formData.paymentMethod === method.value ? 'var(--primary)' : undefined,
+                          backgroundColor: formData.paymentMethod === method.value ? 'var(--primary-opacity)' : undefined
+                        }}
+                      >
+                        <input 
+                          type="radio" 
+                          name="paymentMethod" 
+                          value={method.value} 
+                          checked={formData.paymentMethod === method.value} 
+                          onChange={handleChange}
+                          className="mr-3"
+                        />
+                        <i className={`${method.icon} text-primary mr-3`}></i>
+                        <span className="font-medium text-foreground">{method.label}</span>
+                      </label>
+                    ))}
                   </div>
-                  <div className="row g-4 text-start justify-content-center border-bottom py-3">
-                    <div className="col-12">
-                      <h5 className="mb-3">Payment Method</h5>
-                      <div className="form-check my-2">
-                        <input type="radio" className="form-check-input bg-primary border-0" id="pm-cod" name="paymentMethod" value="cod" checked={formData.paymentMethod === 'cod'} onChange={handleChange} />
-                        <label className="form-check-label" htmlFor="pm-cod">Cash on Delivery</label>
+
+                  {formData.paymentMethod === 'bank-transfer' && bankInfo && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 bg-accent/10 border border-accent/20 rounded-lg space-y-3"
+                    >
+                      <h4 className="font-semibold text-foreground">Bank Transfer Details</h4>
+                      <div className="space-y-2 text-sm">
+                        <p><span className="font-medium">Bank:</span> {bankInfo.bankName}</p>
+                        <p><span className="font-medium">Account Name:</span> {bankInfo.accountName}</p>
+                        <p><span className="font-medium">Account Number:</span> {bankInfo.accountNumber}</p>
+                        {bankInfo.instructions && (
+                          <p className="text-muted-foreground italic">{bankInfo.instructions}</p>
+                        )}
                       </div>
-                      <div className="form-check my-2">
-                        <input type="radio" className="form-check-input bg-primary border-0" id="pm-paystack" name="paymentMethod" value="paystack" checked={formData.paymentMethod === 'paystack'} onChange={handleChange} />
-                        <label className="form-check-label" htmlFor="pm-paystack">Paystack (Card, Bank, USSD)</label>
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">Transfer Reference</label>
+                        <input 
+                          type="text"
+                          className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          name="bankRef" 
+                          value={formData.bankRef} 
+                          onChange={handleChange} 
+                          placeholder="e.g., Mobile app reference"
+                        />
                       </div>
-                      <div className="form-check my-2">
-                        <input type="radio" className="form-check-input bg-primary border-0" id="pm-bank" name="paymentMethod" value="bank-transfer" checked={formData.paymentMethod === 'bank-transfer'} onChange={handleChange} />
-                        <label className="form-check-label" htmlFor="pm-bank">Bank Transfer</label>
-                      </div>
-                    </div>
-                    {formData.paymentMethod === 'bank-transfer' && (
-                      <div className="col-12">
-                        <div className="p-3 border rounded bg-dark-subtle">
-                          <p className="mb-1"><strong>Bank:</strong> {bankInfo?.bankName || '-'}</p>
-                          <p className="mb-1"><strong>Account Name:</strong> {bankInfo?.accountName || '-'}</p>
-                          <p className="mb-1"><strong>Account Number:</strong> {bankInfo?.accountNumber || '-'}</p>
-                          <p className="mb-2 small text-muted">{bankInfo?.instructions || 'Use your Order ID as payment reference.'}</p>
-                          <div className="row g-2">
-                            <div className="col-12 col-md-6">
-                              <label className="form-label">Transfer Reference</label>
-                              <input className="form-control" name="bankRef" value={formData.bankRef} onChange={handleChange} placeholder="e.g. Mobile app reference" />
-                            </div>
-                          </div>
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+
+              {/* Right - Order Summary */}
+              <motion.div
+                className="lg:col-span-1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <div className="sticky top-24 bg-card border border-border rounded-lg p-6 space-y-6">
+                  <h3 className="text-xl font-bold text-foreground">Order Summary</h3>
+
+                  {/* Items */}
+                  <div className="space-y-4 max-h-80 overflow-y-auto">
+                    {cart.items.map((item) => (
+                      <div key={item.product._id} className="flex gap-3 pb-4 border-b border-border last:border-0">
+                        <img
+                          src={getImageUrl(item.product.image) || '/img/product-placeholder.jpg'}
+                          className="w-16 h-16 rounded-lg object-cover bg-muted"
+                          alt={item.product.name}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '/img/product-placeholder.jpg';
+                          }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-foreground truncate">{item.product.name}</p>
+                          <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
+                          <p className="text-sm font-semibold text-primary mt-1">
+                            {formatCurrency(item.product.price * item.quantity)}
+                          </p>
                         </div>
                       </div>
-                    )}
+                    ))}
                   </div>
-                  <div className="row g-4 text-center align-items-center justify-content-center pt-4">
-                    <button
-                      type="submit"
-                      className="btn btn-primary py-3 px-4 text-uppercase w-100 btn-glow"
-                      disabled={loading}
-                    >
-                      {loading ? 'Placing Order...' : 'Place Order'}
-                    </button>
+
+                  {/* Totals */}
+                  <div className="space-y-3 pt-4 border-t border-border">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="font-medium text-foreground">{formatCurrency(subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Shipping</span>
+                      <span className="font-medium text-foreground">{formatCurrency(shipping)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Tax</span>
+                      <span className="font-medium text-foreground">{formatCurrency(0)}</span>
+                    </div>
+                  </div>
+
+                  {/* Grand Total */}
+                  <div className="pt-4 border-t border-border flex justify-between items-center">
+                    <span className="text-lg font-semibold text-foreground">Total</span>
+                    <span className="text-3xl font-bold text-primary">{formatCurrency(total)}</span>
+                  </div>
+
+                  {/* Place Order Button */}
+                  <motion.button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {loading ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin"></i>
+                        Placing Order...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-check-circle"></i>
+                        Place Order
+                      </>
+                    )}
+                  </motion.button>
+
+                  {/* Security Info */}
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
+                    <p className="text-xs text-muted-foreground flex items-center gap-2">
+                      <i className="fas fa-shield-alt text-primary"></i>
+                      Your payment information is secure and encrypted
+                    </p>
                   </div>
                 </div>
-              </div>
-            </form>
-          )}
-        </div>
-      </AnimatedSection>
-      {/* Checkout Page End */}
+              </motion.div>
+            </div>
+          </form>
+        )}
+      </motion.div>
     </Layout>
   );
 };
