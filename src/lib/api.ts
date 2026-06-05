@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const raw = import.meta.env.VITE_API_URL as string | undefined;
+const raw = import.meta.env.VITE_API_URL as string;
 let baseURL = "/api";
 let apiBaseUrl = "";
 
