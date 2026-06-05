@@ -5,6 +5,7 @@ let serverInstance: any = null;
 async function getServer() {
   if (!serverInstance) {
     try {
+      // @ts-ignore - server.js is dynamically built by Vite
       const serverModule = await import('../dist/server/server.js');
       serverInstance = serverModule.default;
       console.log('[v0] Server loaded successfully');
