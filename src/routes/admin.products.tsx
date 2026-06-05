@@ -139,6 +139,10 @@ function AdminProductsPage() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!form.image) {
+        toast.error("Please upload a product image");
+        return;
+      }
       const payload = {
         ...form,
         price: Number(form.price),
