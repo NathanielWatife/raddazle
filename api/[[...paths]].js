@@ -1,13 +1,11 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
-
-// Dynamically import the server to allow for proper Node.js environment
-let serverInstance: any = null;
+let serverInstance = null;
 
 async function getServer() {
   if (!serverInstance) {
     try {
-      const { default: server } = await import('../dist/server/server.js');
-      serverInstance = server;
+      const serverModule = await import('../dist/server/server.js');
+      serverInstance = serverModule.default;
+      console.log('[v0] Server instance imported successfully');
     } catch (error) {
       console.error('[v0] Failed to import server:', error);
       throw error;
@@ -16,36 +14,32 @@ async function getServer() {
   return serverInstance;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(req, res) {
   try {
     console.log('[v0] Incoming request:', { method: req.method, url: req.url });
     
     const server = await getServer();
     console.log('[v0] Server instance loaded:', !!server);
+    console.log('[v0] Server has fetch method:', typeof server?.fetch === 'function');
 
-    // Construct the request URL - use / as root path for the server
+    // Construct the request URL
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
     
-    // Get the pathname from the API route
-    let pathname = req.url || '/';
-    // Remove any query parameters
-    if (pathname.includes('?')) {
-      pathname = pathname.split('?')[0];
-    }
-    
-    const url = `${protocol}://${host}${pathname}${req.url?.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
+    // Get the full URL with query params
+    let fullPath = req.url || '/';
+    const url = `${protocol}://${host}${fullPath}`;
     console.log('[v0] Constructed URL:', url);
 
-    // Create a Request object for the server's fetch handler
-    const headers: Record<string, string> = {};
+    // Build headers object for the Request
+    const headers = {};
     Object.entries(req.headers).forEach(([key, value]) => {
       if (key !== 'host' && key !== 'content-length' && value !== undefined) {
-        headers[key] = Array.isArray(value) ? value.join(', ') : value;
+        headers[key] = Array.isArray(value) ? value.join(', ') : String(value);
       }
     });
 
-    const requestInit: RequestInit = {
+    const requestInit = {
       method: req.method,
       headers,
     };
@@ -58,18 +52,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       requestInit.body = bodyStr;
     }
 
-    console.log('[v0] Request init:', { method: requestInit.method, url, headersCount: Object.keys(headers).length });
+    console.log('[v0] Request init:', { method: requestInit.method, headers: Object.keys(headers) });
 
     // Call the server's fetch method
-    const response = await server.fetch(new Request(url, requestInit));
+    const serverRequest = new Request(url, requestInit);
+    console.log('[v0] Calling server.fetch with URL:', url);
+    
+    const response = await server.fetch(serverRequest);
     
     console.log('[v0] Server response status:', response.status);
+    console.log('[v0] Server response headers:', Array.from(response.headers.entries()));
 
     // Set response status
     res.status(response.status);
 
     // Copy response headers
-    response.headers.forEach((value: string, key: string) => {
+    response.headers.forEach((value, key) => {
       // Skip content-length as Vercel will calculate it
       if (key.toLowerCase() !== 'content-length') {
         res.setHeader(key, value);
@@ -79,13 +77,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Send response body
     const body = await response.text();
     console.log('[v0] Response body length:', body.length);
+    
+    // Ensure we send the response correctly
+    if (response.status >= 300 && response.status < 400) {
+      // Handle redirects
+      const location = response.headers.get('location');
+      if (location) {
+        res.setHeader('Location', location);
+      }
+    }
+    
     res.send(body);
   } catch (error) {
     console.error('[v0] Handler error:', error);
+    console.error('[v0] Error stack:', error?.stack);
     res.status(500).json({
       error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
+      message: error?.message || 'Unknown error',
+      stack: error?.stack,
     });
   }
-}
+};
