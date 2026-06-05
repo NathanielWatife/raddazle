@@ -51,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const response = await server.fetch(new Request(url, requestInit));
     res.status(response.status);
 
-    response.headers.forEach((value, key) => {
+    response.headers.forEach((value: string, key: string) => {
       if (key.toLowerCase() !== 'content-length') {
         res.setHeader(key, value);
       }
