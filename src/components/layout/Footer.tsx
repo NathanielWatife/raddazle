@@ -36,9 +36,11 @@ export function Footer() {
         <div className="grid gap-12 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div>
             <Link to="/" className="flex items-center gap-2">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
-                <Sparkles className="h-4 w-4" />
-              </span>
+              <img
+                src="/img/favicon.ico"
+                alt="Raddazle Logo"
+                className="h-8 w-8 object-contain"
+              />
               <span className="font-display text-lg font-bold tracking-tight">Raddazle</span>
             </Link>
             <p className="mt-4 max-w-sm text-sm text-muted-foreground">

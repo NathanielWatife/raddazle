@@ -56,9 +56,11 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-glow">
-            <Sparkles className="h-4 w-4" />
-          </span>
+          <img
+            src="/img/favicon.ico"
+            alt="Raddazle Logo"
+            className="h-8 w-8 object-contain"
+          />
           <span className="font-display text-lg font-bold tracking-tight">Raddazle</span>
         </Link>
 
