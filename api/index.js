@@ -1,13 +1,28 @@
+const path = require('path');
+
 let serverInstance = null;
 
 async function getServer() {
   if (!serverInstance) {
     try {
-      const serverModule = await import('../dist/server/server.js');
-      serverInstance = serverModule.default;
+      // Use require.resolve to get the absolute path to server.js
+      const serverPath = require.resolve('../dist/server/server.js');
+      console.log('[v0] Server path:', serverPath);
+      
+      // Clear the require cache to always get a fresh instance
+      delete require.cache[serverPath];
+      
+      // Import the server module
+      const serverModule = require(serverPath);
+      serverInstance = serverModule.default || serverModule;
+      
       console.log('[v0] Server instance imported successfully');
+      console.log('[v0] Server type:', typeof serverInstance);
+      console.log('[v0] Server keys:', Object.keys(serverInstance || {}).slice(0, 10));
     } catch (error) {
       console.error('[v0] Failed to import server:', error);
+      console.error('[v0] Error message:', error.message);
+      console.error('[v0] Error stack:', error.stack);
       throw error;
     }
   }
@@ -16,22 +31,34 @@ async function getServer() {
 
 module.exports = async function handler(req, res) {
   try {
-    console.log('[v0] Incoming request:', { method: req.method, url: req.url });
+    console.log('[v0] ===== Handling request =====');
+    console.log('[v0] Method:', req.method);
+    console.log('[v0] URL:', req.url);
+    console.log('[v0] Headers:', Object.keys(req.headers).join(', '));
     
     const server = await getServer();
-    console.log('[v0] Server instance loaded:', !!server);
-    console.log('[v0] Server has fetch method:', typeof server?.fetch === 'function');
+    
+    if (!server) {
+      console.error('[v0] Server instance is null');
+      return res.status(500).json({ error: 'Server instance is null' });
+    }
+    
+    if (typeof server.fetch !== 'function') {
+      console.error('[v0] Server does not have fetch method. Type:', typeof server, 'Keys:', Object.keys(server).slice(0, 10));
+      return res.status(500).json({ error: 'Server does not have fetch method' });
+    }
 
-    // Construct the request URL
+    console.log('[v0] Server fetch method found');
+
+    // Construct the full URL
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
-    
-    // Get the full URL with query params
-    let fullPath = req.url || '/';
+    const fullPath = req.url || '/';
     const url = `${protocol}://${host}${fullPath}`;
-    console.log('[v0] Constructed URL:', url);
+    
+    console.log('[v0] Calling server.fetch with URL:', url);
 
-    // Build headers object for the Request
+    // Build headers
     const headers = {};
     Object.entries(req.headers).forEach(([key, value]) => {
       if (key !== 'host' && key !== 'content-length' && value !== undefined) {
@@ -39,6 +66,7 @@ module.exports = async function handler(req, res) {
       }
     });
 
+    // Build request init
     const requestInit = {
       method: req.method,
       headers,
@@ -52,49 +80,37 @@ module.exports = async function handler(req, res) {
       requestInit.body = bodyStr;
     }
 
-    console.log('[v0] Request init:', { method: requestInit.method, headers: Object.keys(headers) });
-
-    // Call the server's fetch method
+    // Create and send the request
     const serverRequest = new Request(url, requestInit);
-    console.log('[v0] Calling server.fetch with URL:', url);
-    
     const response = await server.fetch(serverRequest);
     
-    console.log('[v0] Server response status:', response.status);
-    console.log('[v0] Server response headers:', Array.from(response.headers.entries()));
+    console.log('[v0] Server response received, status:', response.status);
 
     // Set response status
     res.status(response.status);
 
     // Copy response headers
     response.headers.forEach((value, key) => {
-      // Skip content-length as Vercel will calculate it
       if (key.toLowerCase() !== 'content-length') {
         res.setHeader(key, value);
       }
     });
 
-    // Send response body
+    // Get response body
     const body = await response.text();
     console.log('[v0] Response body length:', body.length);
-    
-    // Ensure we send the response correctly
-    if (response.status >= 300 && response.status < 400) {
-      // Handle redirects
-      const location = response.headers.get('location');
-      if (location) {
-        res.setHeader('Location', location);
-      }
-    }
+    console.log('[v0] Sending response with status:', response.status);
     
     res.send(body);
   } catch (error) {
-    console.error('[v0] Handler error:', error);
+    console.error('[v0] ===== Handler Error =====');
+    console.error('[v0] Error type:', error?.constructor?.name);
+    console.error('[v0] Error message:', error?.message);
     console.error('[v0] Error stack:', error?.stack);
+    
     res.status(500).json({
       error: 'Internal server error',
       message: error?.message || 'Unknown error',
-      stack: error?.stack,
     });
   }
 };
