@@ -33,9 +33,17 @@ function RegisterPage() {
 
     setLoading(true);
     try {
-      await register(name, email, password);
-      toast.success("Account created! Please check your email to verify.");
-      navigate({ to: "/verify-email", search: { email } as never });
+      const res = await register(name, email, password) as { debug?: { verificationToken?: string } };
+      const devToken = res?.debug?.verificationToken;
+      if (devToken) {
+        toast.info("Dev mode: email skipped — token pre-filled for you.");
+      } else {
+        toast.success("Account created! Please check your email to verify.");
+      }
+      navigate({
+        to: "/verify-email",
+        search: { email, ...(devToken ? { token: devToken } : {}) } as never,
+      });
     } catch (err) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
