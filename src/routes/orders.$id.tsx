@@ -33,7 +33,9 @@ export const Route = createFileRoute("/orders/$id")({
 });
 
 interface OrderItem {
-  product?: { _id?: string; name?: string; image?: string } | null;
+  product?: { _id?: string; name?: string; image?: string; price?: number } | null;
+  name?: string;
+  image?: string;
   quantity: number;
   price: number;
 }
@@ -45,13 +47,19 @@ interface OrderDetail {
   paymentMethod?: string;
   totalAmount: number;
   subtotal?: number;
+  itemsPrice?: number;
   shippingFee?: number;
+  shippingPrice?: number;
   tax?: number;
+  taxPrice?: number;
   createdAt: string;
   items: OrderItem[];
   shippingAddress?: {
     fullName?: string;
+    firstName?: string;
+    lastName?: string;
     phone?: string;
+    mobile?: string;
     street?: string;
     city?: string;
     state?: string;
@@ -130,7 +138,9 @@ function OrderDetailPage() {
   }
 
   const canCancel = ["pending", "processing"].includes(order.status?.toLowerCase());
-  const subtotal = order.subtotal ?? order.items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const subtotal = order.subtotal ?? order.itemsPrice ?? order.items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const shippingFee = order.shippingFee ?? order.shippingPrice;
+  const tax = order.tax ?? order.taxPrice;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
@@ -174,31 +184,36 @@ function OrderDetailPage() {
               <h2 className="font-display text-lg font-semibold">Items</h2>
             </div>
             <div className="mt-4 divide-y divide-border">
-              {order.items.map((it, idx) => (
-                <div key={idx} className="flex gap-4 py-4 first:pt-0 last:pb-0">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary">
-                    {it.product?.image && (
-                      <img
-                        src={getImageUrl(it.product.image)}
-                        alt={it.product.name || ""}
-                        className="h-full w-full object-cover"
-                        loading="lazy"
-                      />
-                    )}
-                  </div>
-                  <div className="flex flex-1 items-start justify-between gap-4">
-                    <div>
-                      <p className="font-medium">{it.product?.name || "Product"}</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        Qty {it.quantity} · {formatCurrency(it.price)} each
+              {order.items.map((it, idx) => {
+                // image/name can come from the populated product ref OR the flat stored fields
+                const imgSrc = it.product?.image || it.image || "";
+                const itemName = it.product?.name || it.name || "Product";
+                return (
+                  <div key={idx} className="flex gap-4 py-4 first:pt-0 last:pb-0">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary">
+                      {imgSrc && (
+                        <img
+                          src={getImageUrl(imgSrc)}
+                          alt={itemName}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                        />
+                      )}
+                    </div>
+                    <div className="flex flex-1 items-start justify-between gap-4">
+                      <div>
+                        <p className="font-medium">{itemName}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          Qty {it.quantity} · {formatCurrency(it.price)} each
+                        </p>
+                      </div>
+                      <p className="font-display text-base font-semibold">
+                        {formatCurrency(it.price * it.quantity)}
                       </p>
                     </div>
-                    <p className="font-display text-base font-semibold">
-                      {formatCurrency(it.price * it.quantity)}
-                    </p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -209,10 +224,15 @@ function OrderDetailPage() {
                 <h2 className="font-display text-lg font-semibold">Shipping address</h2>
               </div>
               <div className="mt-3 text-sm text-muted-foreground">
-                {order.shippingAddress.fullName && (
-                  <p className="font-medium text-foreground">{order.shippingAddress.fullName}</p>
+                {(order.shippingAddress.fullName || (order.shippingAddress.firstName)) && (
+                  <p className="font-medium text-foreground">
+                    {order.shippingAddress.fullName ||
+                      [order.shippingAddress.firstName, order.shippingAddress.lastName].filter(Boolean).join(" ")}
+                  </p>
                 )}
-                {order.shippingAddress.phone && <p>{order.shippingAddress.phone}</p>}
+                {(order.shippingAddress.phone || order.shippingAddress.mobile) && (
+                  <p>{order.shippingAddress.phone || order.shippingAddress.mobile}</p>
+                )}
                 <p>
                   {[
                     order.shippingAddress.street,
@@ -237,11 +257,11 @@ function OrderDetailPage() {
             </div>
             <div className="mt-4 space-y-2 text-sm">
               <Row label="Subtotal" value={formatCurrency(subtotal)} />
-              {order.shippingFee !== undefined && (
-                <Row label="Shipping" value={formatCurrency(order.shippingFee)} />
+              {shippingFee !== undefined && (
+                <Row label="Shipping" value={formatCurrency(shippingFee)} />
               )}
-              {order.tax !== undefined && order.tax > 0 && (
-                <Row label="Tax" value={formatCurrency(order.tax)} />
+              {tax !== undefined && tax > 0 && (
+                <Row label="Tax" value={formatCurrency(tax)} />
               )}
               <Separator className="my-2" />
               <Row label="Total" value={formatCurrency(order.totalAmount)} bold />
