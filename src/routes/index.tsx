@@ -241,40 +241,7 @@ function HomePage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-ink p-10 text-background sm:p-16">
-          <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-primary/30 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-[oklch(0.6_0.2_280)]/25 blur-3xl" />
-          <div className="relative grid items-center gap-8 lg:grid-cols-[1.4fr_1fr]">
-            <div>
-              <h3 className="font-display text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-                Join the Raddazle club.
-              </h3>
-              <p className="mt-3 max-w-lg text-background/70">
-                Early access to drops, member-only discounts, and free shipping on your first order.
-              </p>
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                toast.success("You're in. Check your inbox.");
-              }}
-              className="flex w-full overflow-hidden rounded-full bg-background/10 p-1.5 backdrop-blur"
-            >
-              <input
-                type="email"
-                required
-                placeholder="you@email.com"
-                className="w-full bg-transparent px-5 py-2 text-sm text-background placeholder:text-background/50 outline-none"
-              />
-              <button className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90">
-                Join
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
+      
     </>
   );
 }
