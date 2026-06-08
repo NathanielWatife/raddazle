@@ -128,7 +128,7 @@ function OrderDetailPage() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center">
         <h1 className="font-display text-2xl font-bold">Order not found</h1>
-        <Link to="/orders">
+        <Link to="/">
           <Button variant="outline" className="mt-4 rounded-full">
             Back to orders
           </Button>

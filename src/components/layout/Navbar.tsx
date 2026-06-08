@@ -157,7 +157,7 @@ export function Navbar() {
           {!isAuthenticated && (
             <Link to="/register" className="hidden sm:block">
               <Button size="sm" className="rounded-full shadow-glow">
-                Get started
+                Sign Up
               </Button>
             </Link>
           )}
@@ -199,7 +199,7 @@ export function Navbar() {
                     </Button>
                   </Link>
                   <Link to="/register" className="flex-1">
-                    <Button className="w-full rounded-full">Get started</Button>
+                    <Button className="w-full rounded-full">Sign up</Button>
                   </Link>
                 </div>
               )}

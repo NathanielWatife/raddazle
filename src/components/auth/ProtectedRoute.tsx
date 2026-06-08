@@ -18,7 +18,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: Props) {
     if (!isAuthenticated) {
       navigate({ to: "/login", search: { redirect: path } as never });
     } else if (requireAdmin && !isAdmin) {
-      navigate({ to: "/" });
+      navigate({ to: "/admin/dashboard" });
     }
   }, [initialized, loading, isAuthenticated, isAdmin, requireAdmin, navigate, path]);
 
