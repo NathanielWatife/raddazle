@@ -30,6 +30,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ShopIdRouteImport } from './routes/shop.$id'
+import { Route as PaymentCallbackRouteImport } from './routes/payment.callback'
 import { Route as OrdersIdRouteImport } from './routes/orders.$id'
 import { Route as AdminWebhookEventsRouteImport } from './routes/admin.webhook-events'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
@@ -148,6 +149,11 @@ const ShopIdRoute = ShopIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ShopRoute,
 } as any)
+const PaymentCallbackRoute = PaymentCallbackRouteImport.update({
+  id: '/payment/callback',
+  path: '/payment/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrdersIdRoute = OrdersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/admin/webhook-events': typeof AdminWebhookEventsRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/payment/callback': typeof PaymentCallbackRoute
   '/shop/$id': typeof ShopIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/products/$id/inventory': typeof AdminProductsIdInventoryRoute
@@ -275,6 +282,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/admin/webhook-events': typeof AdminWebhookEventsRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/payment/callback': typeof PaymentCallbackRoute
   '/shop/$id': typeof ShopIdRoute
   '/admin': typeof AdminIndexRoute
   '/admin/products/$id/inventory': typeof AdminProductsIdInventoryRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/admin/webhook-events': typeof AdminWebhookEventsRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/payment/callback': typeof PaymentCallbackRoute
   '/shop/$id': typeof ShopIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/products/$id/inventory': typeof AdminProductsIdInventoryRoute
@@ -348,6 +357,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/webhook-events'
     | '/orders/$id'
+    | '/payment/callback'
     | '/shop/$id'
     | '/admin/'
     | '/admin/products/$id/inventory'
@@ -382,6 +392,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/webhook-events'
     | '/orders/$id'
+    | '/payment/callback'
     | '/shop/$id'
     | '/admin'
     | '/admin/products/$id/inventory'
@@ -417,6 +428,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/webhook-events'
     | '/orders/$id'
+    | '/payment/callback'
     | '/shop/$id'
     | '/admin/'
     | '/admin/products/$id/inventory'
@@ -442,6 +454,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
+  PaymentCallbackRoute: typeof PaymentCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -592,6 +605,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/shop/$id'
       preLoaderRoute: typeof ShopIdRouteImport
       parentRoute: typeof ShopRoute
+    }
+    '/payment/callback': {
+      id: '/payment/callback'
+      path: '/payment/callback'
+      fullPath: '/payment/callback'
+      preLoaderRoute: typeof PaymentCallbackRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/orders/$id': {
       id: '/orders/$id'
@@ -763,6 +783,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   VerifyEmailRoute: VerifyEmailRoute,
+  PaymentCallbackRoute: PaymentCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
